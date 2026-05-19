@@ -1,0 +1,27 @@
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+class CheckRole
+{
+    public function handle(Request $request, Closure $next, string ...$roles): Response
+    {
+        if (!$request->user()) {
+            return redirect()->route('login');
+        }
+
+        $userRole = strtolower($request->user()->role->nombre ?? '');
+
+        foreach ($roles as $role) {
+            if ($userRole === strtolower($role)) {
+                return $next($request);
+            }
+        }
+
+        abort(403, 'No tienes permiso para acceder a esta sección.');
+    }
+}
